@@ -13,7 +13,13 @@ const Schema = new mongoose.Schema
     },
     email : {
         type : String,
-        require : true
+        require : true,
+        unique:true
+    },
+    uniqueName : {
+        type : String,
+        require : true,
+        unique:true
     },
     password : {
         type : String,
@@ -61,7 +67,6 @@ const Schema = new mongoose.Schema
         });
 
     } catch (error) {
-        console.log(error);
     }
 }
 
@@ -88,10 +93,19 @@ export const Logout = async (req,res) => {
             success: false
         })
 
-        const hashedPassword = await bcryptjs.hash(password,10);
-        const person = new Data({ fullName, email, password:hashedPassword });
-        await person.save();
 
+
+        const atIndex = email.indexOf('@');
+    
+        const uniqueName =  (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
+
+       
+       
+   
+        
+        const hashedPassword = await bcryptjs.hash(password,10);
+        const person = new Data({ fullName, email, password:hashedPassword , uniqueName});
+        await person.save();
         return res.status(201).json({
             message: "Account created successfully",
             success: true
@@ -100,7 +114,6 @@ export const Logout = async (req,res) => {
 
     catch(e)
     {
-                console.log(e)
     }
 }
 
@@ -119,9 +132,14 @@ export const Google = async( req, res)=>{
       
         else
         {
+            const atIndex = email.indexOf('@');
+    
+            const uniqueName =  (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
+
+            
 
             const hashedPassword = await bcryptjs.hash(password,10);
-            const person = new Data({ fullName, email, password:hashedPassword });
+            const person = new Data({ fullName, email, password:hashedPassword, uniqueName });
             await person.save();
             
             return res.status(201).json({
@@ -134,25 +152,49 @@ export const Google = async( req, res)=>{
 
     catch(e)
     {
-                console.log(e)
     }
 }
 
 
 
 export const Delete = async( req, res)=>{
-   
+
     const email = req.body
-    // console.log(email)
+    
+    if(!email)
+        return res.status(404).json({ message: 'Item not found' });
+ 
     try {
         const item = await Data.findOneAndDelete( email);
 
         
         if (!item) {
-          return res.status(404).json({ message: 'Item not found' });
+            return res.status(404).json({ message: 'Item not found' });
         }
         res.status(200).json({ message: 'User Deleted Successfully' });
       } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+      }
+}
+
+
+
+
+
+
+
+export const Udetails = async( req, res)=>{
+   
+    const uniqueName = req.query.user
+    try {
+        const item = await Data.findOne( {uniqueName});
+
+        
+        if (!item) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        res.status(200).json({item,  message: 'User details received' });
+    } catch (error) {
         res.status(500).json({ message: 'Server error', error });
       }
 }

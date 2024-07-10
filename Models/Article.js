@@ -1,7 +1,5 @@
 
 import mongoose from 'mongoose'
-import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
 // import { error } from './Error.js';
 
 const Schema = new mongoose.Schema
@@ -31,7 +29,7 @@ const Schema = new mongoose.Schema
       },
       category: {  
         type: String,
-        // default: 'uncategorized',
+        default: 'uncategorized',
       },
      
     },
@@ -79,7 +77,7 @@ export const create = async (req, res) => {
         success:true
       })
 
-    }
+    } 
   };
 
   /////.............................................................................................
@@ -89,15 +87,15 @@ export const create = async (req, res) => {
       const startIndex = parseInt(req.query.startIndex) || 0;
       const limit = parseInt(req.query.limit) || 9;
       const sortDirection = req.query.order === 'asc' ? 1 : -1;
-      const resData = await Data.find({
+      let resData = await Data.find({
         ...(req.query.userId && { userId: req.query.userId }),
         ...(req.query.category && { category: req.query.category }),
         ...(req.query.art_name && { art_name: req.query.art_name }), 
         ...(req.query.artId && { artId: req.query.artId }),
-        ...(req.query._id && { artId: req.query._id }),
+        ...(req.query._id && { _id: req.query._id }),
         ...(req.query.searchTerm && {
           $or: [
-            { title: { $regex: req.query.searchTerm, $options: 'i' } },// regex-mogoose & i means no case sensitive
+            { title: { $regex: req.query.searchTerm, $options: 'i' } },
             { content: { $regex: req.query.searchTerm, $options: 'i' } },
           ],
         }),
@@ -105,7 +103,21 @@ export const create = async (req, res) => {
         .sort({ updatedAt: sortDirection })
         .skip(startIndex)
         .limit(limit);
+          if(req.query.ranDom )
+          {
+            const shuffledArray = resData.slice();
   
+            for (let i = shuffledArray.length - 1; i > 0; i--) {
+              // Generate a random index from 0 to i
+              const j = Math.floor(Math.random() * (i + 1));
+              
+              // Swap elements at indices i and j
+              [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+            }
+
+            resData = shuffledArray
+
+          }
       const total = await Data.countDocuments();
   
       const now = new Date();
@@ -166,29 +178,29 @@ export const Delete = async( req, res)=>{
 
 export const Update = async( req, res)=>{
    
-  // const { id } = req.params;
-  const { _id, art_name, content, image, category } = req.body;
+  const { _id, art_name, content, image, category } = req.body; 
+  console.log(req.body)  
 
 
-  const artId = req.body.art_name
-  .split(' ')
-  .join('-')
-  .toLowerCase()
-  .replace(/[^a-z0-9-]/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
+
 
   try {
     const updatedData = await Data.findByIdAndUpdate(
-      _id,
-      { art_name, content, image, category, artId },
+      _id,  
+      { art_name, content, image, category },
       { new: true, runValidators: true }
     );
-
+   
     if (!updatedData) {
       return res.status(404).json({ message: 'Data not found' });
     }
 
     res.status(200).json({ message: 'Data updated successfully', updatedData });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+//////////////////////////////////////////////////////////////////////////////////////
+

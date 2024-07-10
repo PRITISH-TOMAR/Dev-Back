@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import cors from "cors";
 import Routemain from './Routes/Routemain.js';
 import RouteArticles from './Routes/RouteArticles.js';
+import RouteComment from './Routes/RouteComment.js'
 
 // Connect()
 dotenv.config({ path: '.env' });
@@ -31,6 +32,7 @@ app.use(cors(corsOptions));
 
 app.use("/api", Routemain)
 app.use("/articles", RouteArticles)
+app.use("/comments", RouteComment)
 // https:localhost/api/name/"newUser"
 
 // app.get("/", (req, res)=>{
