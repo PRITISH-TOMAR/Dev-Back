@@ -24,12 +24,15 @@ const Schema = new mongoose.Schema
       },
       image: {
         type: String,
-        default:
-          'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png',
+       required: true,
       },
       category: {  
         type: String,
         default: 'uncategorized',
+      },
+      likes:{  
+        type: Number,
+        default: 1,
       },
      
     },
@@ -55,10 +58,12 @@ export const create = async (req, res) => {
   .join('-')
   .toLowerCase()
   .replace(/[^a-z0-9-]/g, '') + '-' + (Math.floor(Math.random() * 900) + 100);
+
+  const likes = (Math.floor(Math.random() * 90) + 10)
    
 
     const newArt = new Data({
-      ...req.body, artId
+      ...req.body, artId, likes
       
     });
     try {
@@ -84,25 +89,34 @@ export const create = async (req, res) => {
 
   export const retrieve = async (req, res) => {
     try {
+      // console.log(req.query.search)
+      // console.log(req.query)
       const startIndex = parseInt(req.query.startIndex) || 0;
       const limit = parseInt(req.query.limit) || 9;
-      const sortDirection = req.query.order === 'asc' ? 1 : -1;
+      const order= req.query.order
+      const sortDirection = order=== 'asc' ? 1 : -1;
       let resData = await Data.find({
         ...(req.query.userId && { userId: req.query.userId }),
-        ...(req.query.category && { category: req.query.category }),
+        ...(req.query.category && req.query.category!=="All" && { category: req.query.category }),
         ...(req.query.art_name && { art_name: req.query.art_name }), 
         ...(req.query.artId && { artId: req.query.artId }),
         ...(req.query._id && { _id: req.query._id }),
-        ...(req.query.searchTerm && {
+        ...(req.query.search && {
           $or: [
-            { title: { $regex: req.query.searchTerm, $options: 'i' } },
-            { content: { $regex: req.query.searchTerm, $options: 'i' } },
+            { title: { $regex: req.query.search, $options: 'i' } },
+            { content: { $regex: req.query.search, $options: 'i' } },
           ],
         }),
       })
-        .sort({ updatedAt: sortDirection })
+        .sort({ createdAt: sortDirection })
         .skip(startIndex)
         .limit(limit);
+
+        // const total =  resData.length;
+        // console.log(resData.length)
+
+
+
           if(req.query.ranDom )
           {
             const shuffledArray = resData.slice();
@@ -118,7 +132,6 @@ export const create = async (req, res) => {
             resData = shuffledArray
 
           }
-      const total = await Data.countDocuments();
   
       const now = new Date();
   
@@ -127,9 +140,15 @@ export const create = async (req, res) => {
         now.getMonth() - 1,
         now.getDate()
       );
-  
       const lastMonth  = await Data.countDocuments({
         createdAt: { $gte: oneMonthAgo },
+       ...(req.query.userId && {userId: req.query.userId })
+      });
+  
+
+      const total  = await Data.countDocuments({
+        
+       ...(req.query.userId && {userId: req.query.userId })
       });
   
       res.status(200).json({
@@ -137,6 +156,7 @@ export const create = async (req, res) => {
         total,
         lastMonth,
       });
+      // console.log(resData)
     } catch (error) {
      console.log(error)
     }
@@ -179,7 +199,7 @@ export const Delete = async( req, res)=>{
 export const Update = async( req, res)=>{
    
   const { _id, art_name, content, image, category } = req.body; 
-  console.log(req.body)  
+  // console.log(req.body)  
 
 
 

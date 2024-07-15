@@ -54,10 +54,38 @@ export const Create = async (req, res) => {
 };
 
 export const Retrieve = async (req, res) => {
-   const artId = req.query.artId
+
+ 
+   const order= req.query.order|| 'asc'
+  //  const sortDirection = order=== 'asc' ? 1 : -1;
+  
+
   try {
-    const comments = await Comment.find({ artId }).sort({updatedAt:-1})
-    return res.status(200).json({message:'OK', comments});
+    let comments = await Comment.find({  
+       ...(req.query.userId && { userId: req.query.userId }),
+       ...(req.query.artId && { artId: req.query.artId }),
+         }).sort({createdAt:-1})
+
+
+      const now = new Date();
+  
+      const oneMonthAgo = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        now.getDate()
+      );
+      const lastMonth  = await Comment.countDocuments({
+        createdAt: { $gte: oneMonthAgo },
+       ...(req.query.userId && {userId: req.query.userId })
+      });
+  
+
+      const total  = await Comment.countDocuments({
+        
+       ...(req.query.userId && {userId: req.query.userId })
+      });
+     
+    return res.status(200).json({message:'OK', comments , total, lastMonth});
 } catch (error) {
    return res.status(500).json("Errorr");
   }
@@ -100,7 +128,7 @@ export const editComment = async (req, res) => {
         content: editedComment,
       },
       { new: true }
-    );
+    )
     res.status(200).json({edited});
   } catch (error) {
     // next(error);

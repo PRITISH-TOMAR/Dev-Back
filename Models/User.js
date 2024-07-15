@@ -24,6 +24,11 @@ const Schema = new mongoose.Schema
     password : {
         type : String,
         require : true
+    },
+    profilePicture : {
+        type : String,
+        require:true,
+        default:"https://imgs.search.brave.com/GVcDP9cX1YLhjAXS0-gIVZzpPpmCYLlsOHfwIOt7VfU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9idXJz/dC5zaG9waWZ5Y2Ru/LmNvbS9waG90b3Mv/dHdvLXRvbmUtaW5r/LWNsb3VkLmpwZz93/aWR0aD0xMDAwJmZv/cm1hdD1wanBnJmV4/aWY9MCZpcHRjPTA"
     }
 }, { timestamps : true})
 
@@ -48,7 +53,7 @@ const Schema = new mongoose.Schema
             });
         }
 
-        const isMatch = await bcryptjs.compare(password, user.password);
+        const isMatch =  bcryptjs.compare(password, user.password);
         if(!isMatch){
             return res.status(401).json({
                 message:"Invalid email or password",
@@ -118,42 +123,41 @@ export const Logout = async (req,res) => {
 }
 
 
-export const Google = async( req, res)=>{
-    try{
-        const { fullName, email, password}= req.body
+export const Google = async (req, res) => {
+    try {
+        const { fullName, email, profilePicture } = req.body;
+        // console.log(req.body);
+        const euser = await Data.findOne({ email: email });
 
-        const euser = await Data.findOne({ email: email})
-
-        if(euser) return res.status(201).json({
-            message:`Welcome back ${euser.fullName}`,
-            user: euser,
-            success: true
-        })
-      
-        else
-        {
-            const atIndex = email.indexOf('@');
-    
-            const uniqueName =  (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
-
-            
-
-            const hashedPassword = await bcryptjs.hash(password,10);
-            const person = new Data({ fullName, email, password:hashedPassword, uniqueName });
-            await person.save();
-            
+        if (euser) {
             return res.status(201).json({
-                message:`Welcome  ${fullName}`,
-                user : person,
-                success: true,
-            })
-        }
-    }
+                message: `Welcome back ${euser.fullName}`,
+                user: euser,
+                success: true
+            });
+        } else {
+            const atIndex = email.indexOf('@');
+            const uniqueName = (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
+            const password = Math.floor(Math.random() * 100000).toString(); // Ensure password is a string
+            const hashedPassword = await bcryptjs.hash(password, 10); // Await the hashing
 
-    catch(e)
-    {
+            const person = new Data({ fullName, email, password: hashedPassword, uniqueName, profilePicture });
+            await person.save();
+
+            return res.status(201).json({
+                message: `Welcome ${fullName}`,
+                user: person,
+                success: true,
+            });
+        }
+    } catch (e) {
+        // console.log(e);
+        return res.status(500).json({
+            message: 'Internal server error',
+            success: false,
+        });
     }
-}
+};
 
 
 
@@ -200,5 +204,45 @@ export const Udetails = async( req, res)=>{
 }
 
 
+///////////////////////////////////////////////////////////
 
 
+export const Update = async( req, res)=>{
+   
+    const { _id} = req.body; 
+    
+
+    
+   
+
+  
+  console.log(_id)
+  
+  
+    try {
+      const updatedUser = await Data.findByIdAndUpdate(
+        _id,  
+        {  
+             ...(req.body.fullName && { fullName: req.body.fullName }),
+             ...(req.body.email && { email: req.body.email }),
+             ...(req.body.profilePicture && { profilePicture: req.body.profilePicture }),
+        },
+        { new: true, runValidators: true }
+      );
+     
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Data not found' });
+      }
+  
+      res.status(200).json({ message: 'Data updated successfully', updatedUser });
+    //   console.log(updatedUser)  
+
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ message: 'Server error', error });
+    }
+  };
+  
+  //////////////////////////////////////////////////////////////////////////////////////
+  
+  
