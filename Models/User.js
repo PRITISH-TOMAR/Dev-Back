@@ -94,7 +94,7 @@ export const Logout = async (req,res) => {
         const user = await Data.findOne({email})
 
         if(user) return res.status(401).json({
-            message: "Email exist",
+            message: "Email already exists!",
             success: false
         })
 
@@ -190,6 +190,7 @@ export const Delete = async( req, res)=>{
 export const Udetails = async( req, res)=>{
    
     const uniqueName = req.query.user
+    console.log(uniqueName)
     try {
         const item = await Data.findOne( {uniqueName});
 

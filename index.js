@@ -6,6 +6,7 @@ import cors from "cors";
 import Routemain from './Routes/Routemain.js';
 import RouteArticles from './Routes/RouteArticles.js';
 import RouteComment from './Routes/RouteComment.js'
+import Email from "./Routes/RouteEmail.js"
 
 // Connect()
 dotenv.config({ path: '.env' });
@@ -24,22 +25,20 @@ app.use(express.json());
 
 
 const corsOptions = {
-    origin:'http://localhost:3000',
+    origin:process.env.ORIGIN,
     credentials:true
 }
+
+
 app.use(cors(corsOptions));
 
 
 app.use("/api", Routemain)
 app.use("/articles", RouteArticles)
 app.use("/comments", RouteComment)
-// https:localhost/api/name/"newUser"
+app.use("/email", Email)
 
-// app.get("/", (req, res)=>{
-//     res.json({
-//         message:"Hello"
-//     })
-// })
+
 
 app.listen(process.env.PORT, () => {
     console.log('Server Running at Port ' + process.env.PORT);

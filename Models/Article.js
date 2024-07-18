@@ -30,9 +30,13 @@ const Schema = new mongoose.Schema
         type: String,
         default: 'uncategorized',
       },
-      likes:{  
+      likes: {
+        type: Array,
+        default: [],
+      },
+      numberOfLikes: {
         type: Number,
-        default: 1,
+        default: 0,
       },
      
     },
@@ -132,6 +136,16 @@ export const create = async (req, res) => {
             resData = shuffledArray
 
           }
+
+
+          if(req.query.order && req.query.order=== 'like')
+          {
+            resData.sort((a, b) => {
+              const dateA = new Date(a.numberOfLikes);
+              const dateB = new Date(b.numberOfLikes);
+              return dateB - dateA; 
+            });
+          }
   
       const now = new Date();
   
@@ -224,3 +238,26 @@ export const Update = async( req, res)=>{
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+export const LikeArticle = async (req, res) => {
+  try {
+    const article = await Data.findById(req.query.id);
+    const userId = req.query.user
+  
+    // console.log(userId)
+    if (!article) {
+      return res.status(404).json({message: 'Comment not found'});
+    }
+    const userIndex = article.likes.indexOf(userId);
+    if (userIndex === -1) {
+      article.numberOfLikes += 1;
+      article.likes.push(userId);
+    } else {
+      article.numberOfLikes -= 1;
+      article.likes.splice(userIndex, 1);
+    }
+    await article.save();
+    res.status(200).json({article});
+  } catch (error) {
+    res.status(500).json({ message: "Error Occured !"})
+  }
+};
