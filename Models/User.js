@@ -32,12 +32,13 @@ const Schema = new mongoose.Schema
     }
 }, { timestamps : true})
 
- const Data = mongoose.model("person", Schema) 
+ const Data = mongoose.model("users", Schema) 
 
  export const Login = async(req,res)=>{
     try {
         
         const {email,password} = req.body;
+        console.log(req.body)
         if(!email || !password){
             return res.status(401).json({
                 message:"Invalid data",

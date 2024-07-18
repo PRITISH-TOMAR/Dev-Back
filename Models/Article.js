@@ -43,7 +43,7 @@ const Schema = new mongoose.Schema
     { timestamps: true }
   );
 
- const Data = mongoose.model("Article", Schema)   
+ const Data = mongoose.model("articles", Schema)   
 
 // ............................................................Data.........
  
@@ -117,7 +117,7 @@ export const create = async (req, res) => {
         .limit(limit);
 
         // const total =  resData.length;
-        // console.log(resData.length)
+        // console.log(resData)
 
 
 
@@ -165,12 +165,12 @@ export const create = async (req, res) => {
        ...(req.query.userId && {userId: req.query.userId })
       });
   
+      // console.log(resData.length)
       res.status(200).json({
         resData,
         total,
         lastMonth,
       });
-      // console.log(resData)
     } catch (error) {
      console.log(error)
     }
