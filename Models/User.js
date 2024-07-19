@@ -6,95 +6,104 @@ import jwt from "jsonwebtoken";
 
 
 const Schema = new mongoose.Schema
-({
-    fullName : {
-        type : String,
-        require : true
-    },
-    email : {
-        type : String,
-        require : true,
-        unique:true
-    },
-    uniqueName : {
-        type : String,
-        require : true,
-        unique:true
-    },
-    password : {
-        type : String,
-        require : true
-    },
-    profilePicture : {
-        type : String,
-        require:true,
-        default:"https://imgs.search.brave.com/GVcDP9cX1YLhjAXS0-gIVZzpPpmCYLlsOHfwIOt7VfU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9idXJz/dC5zaG9waWZ5Y2Ru/LmNvbS9waG90b3Mv/dHdvLXRvbmUtaW5r/LWNsb3VkLmpwZz93/aWR0aD0xMDAwJmZv/cm1hdD1wanBnJmV4/aWY9MCZpcHRjPTA"
-    }
-}, { timestamps : true})
+    ({
+        fullName: {
+            type: String,
+            require: true
+        },
+        email: {
+            type: String,
+            require: true,
+            unique: true
+        },
+        uniqueName: {
+            type: String,
+            require: true,
+            unique: true
+        },
+        password: {
+            type: String,
+            require: true
+        },
+        profilePicture: {
+            type: String,
+            require: true,
+            default: "https://imgs.search.brave.com/GVcDP9cX1YLhjAXS0-gIVZzpPpmCYLlsOHfwIOt7VfU/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9idXJz/dC5zaG9waWZ5Y2Ru/LmNvbS9waG90b3Mv/dHdvLXRvbmUtaW5r/LWNsb3VkLmpwZz93/aWR0aD0xMDAwJmZv/cm1hdD1wanBnJmV4/aWY9MCZpcHRjPTA"
+        }
+    }, { timestamps: true })
 
- const Data = mongoose.model("users", Schema) 
+const Data = mongoose.model("users", Schema)
 
- export const Login = async(req,res)=>{
+//..........................LOGIN.........................................................
+
+export const Login = async (req, res) => {
     try {
-        
-        const {email,password} = req.body;
+
+        const { email, password } = req.body;
         console.log(req.body)
-        if(!email || !password){
+        if (!email || !password) {
             return res.status(401).json({
-                message:"Invalid data",
-                success:false
-                 
+                message: "Invalid data",
+                success: false
+
             })
         };
-        const user = await Data.findOne({email});
-        if(!user){
+        const user = await Data.findOne({ email });
+        if (!user) {
             return res.status(401).json({
-                message:"Invalid email or password", 
-                success:false
+                message: "Invalid email or password",
+                success: false
             });
         }
 
-        const isMatch =  bcryptjs.compare(password, user.password);
-        if(!isMatch){
+        const isMatch = bcryptjs.compare(password, user.password);
+        if (!isMatch) {
             return res.status(401).json({
-                message:"Invalid email or password",
-                success:false
+                message: "Invalid email or password",
+                success: false
             });
         }
-       const tokenData = {
-        id:Data._id
-       }
-        const token =  jwt.sign(tokenData, "tokenismyfirstbiltarray",{expiresIn:"1h"});
+        const tokenData = {
+            id: Data._id
+        }
+        const token = jwt.sign(tokenData, "tokenismyfirstbiltarray", { expiresIn: "1h" });
 
         return res.status(200).cookie("token", token).json({
-            message:`Welcome back ${user.fullName}`,
+            message: `Welcome back ${user.fullName}`,
             user,
-            success:true
+            success: true
         });
 
     } catch (error) {
     }
 }
 
-export const Logout = async (req,res) => {
-    return res.status(200).cookie("token", "", {expiresIn:new Date(Date.now()), httpOnly:true}).json({
-        message:"User logged out successfully.",
-        success:true,
+
+
+
+//........................LOGOUT................................
+
+export const Logout = async (req, res) => {
+    return res.status(200).cookie("token", "", { expiresIn: new Date(Date.now()), httpOnly: true }).json({
+        message: "User logged out successfully.",
+        success: true,
     });
 }
 
 
- export const Newuser = async( req, res)=>{
-    try{
-        const { fullName, email, password}= req.body
+// .................REGISTER.............................................
 
-        if( !fullName || !email || !password) return res.status(400).json({
-            message:"Invalid data ", success: false
+export const Newuser = async (req, res) => {
+    try {
+        const { fullName, email, password } = req.body
+
+        if (!fullName || !email || !password) return res.status(400).json({
+            message: "Invalid data ", success: false
         })
 
-        const user = await Data.findOne({email})
+        const user = await Data.findOne({ email })
 
-        if(user) return res.status(401).json({
+        if (user) return res.status(401).json({
             message: "Email already exists!",
             success: false
         })
@@ -102,15 +111,15 @@ export const Logout = async (req,res) => {
 
 
         const atIndex = email.indexOf('@');
-    
-        const uniqueName =  (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
 
-       
-       
-   
-        
-        const hashedPassword = await bcryptjs.hash(password,10);
-        const person = new Data({ fullName, email, password:hashedPassword , uniqueName});
+        const uniqueName = (atIndex !== -1 ? email.substring(0, atIndex) : email) + Math.floor(Math.random() * 1000);
+
+
+
+
+
+        const hashedPassword = await bcryptjs.hash(password, 10);
+        const person = new Data({ fullName, email, password: hashedPassword, uniqueName });
         await person.save();
         return res.status(201).json({
             message: "Account created successfully",
@@ -118,11 +127,11 @@ export const Logout = async (req,res) => {
         })
     }
 
-    catch(e)
-    {
+    catch (e) {
     }
 }
 
+//..............GOOGLE AUTHENTICATION..............................................
 
 export const Google = async (req, res) => {
     try {
@@ -161,90 +170,89 @@ export const Google = async (req, res) => {
 };
 
 
-
-export const Delete = async( req, res)=>{
+//.................................DELETE USER...................................
+export const Delete = async (req, res) => {
 
     const email = req.body
-    
-    if(!email)
-        return res.status(404).json({ message: 'Item not found' });
- 
-    try {
-        const item = await Data.findOneAndDelete( email);
 
-        
+    if (!email)
+        return res.status(404).json({ message: 'Item not found' });
+
+    try {
+        const item = await Data.findOneAndDelete(email);
+
+
         if (!item) {
             return res.status(404).json({ message: 'Item not found' });
         }
         res.status(200).json({ message: 'User Deleted Successfully' });
-      } catch (error) {
+    } catch (error) {
         res.status(500).json({ message: 'Server error', error });
-      }
+    }
 }
 
 
 
 
 
+//................GET USER DETAILS ............................................
 
+export const Udetails = async (req, res) => {
 
-export const Udetails = async( req, res)=>{
-   
     const uniqueName = req.query.user
     console.log(uniqueName)
     try {
-        const item = await Data.findOne( {uniqueName});
+        const item = await Data.findOne({ uniqueName });
 
-        
+
         if (!item) {
             return res.status(404).json({ message: 'Item not found' });
         }
-        res.status(200).json({item,  message: 'User details received' });
+        res.status(200).json({ item, message: 'User details received' });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
-      }
+    }
 }
 
 
-///////////////////////////////////////////////////////////
+//..................UPDATE USER DETAILS
 
 
-export const Update = async( req, res)=>{
-   
-    const { _id} = req.body; 
-    
+export const Update = async (req, res) => {
 
-    
-   
+    const { _id } = req.body;
 
-  
-  console.log(_id)
-  
-  
+
+
+
+
+
+    console.log(_id)
+
+
     try {
-      const updatedUser = await Data.findByIdAndUpdate(
-        _id,  
-        {  
-             ...(req.body.fullName && { fullName: req.body.fullName }),
-             ...(req.body.email && { email: req.body.email }),
-             ...(req.body.profilePicture && { profilePicture: req.body.profilePicture }),
-        },
-        { new: true, runValidators: true }
-      );
-     
-      if (!updatedUser) {
-        return res.status(404).json({ message: 'Data not found' });
-      }
-  
-      res.status(200).json({ message: 'Data updated successfully', updatedUser });
-    //   console.log(updatedUser)  
+        const updatedUser = await Data.findByIdAndUpdate(
+            _id,
+            {
+                ...(req.body.fullName && { fullName: req.body.fullName }),
+                ...(req.body.email && { email: req.body.email }),
+                ...(req.body.profilePicture && { profilePicture: req.body.profilePicture }),
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Data not found' });
+        }
+
+        res.status(200).json({ message: 'Data updated successfully', updatedUser });
+        //   console.log(updatedUser)  
 
     } catch (error) {
-      console.log(error)
-      res.status(500).json({ message: 'Server error', error });
+        console.log(error)
+        res.status(500).json({ message: 'Server error', error });
     }
-  };
-  
-  //////////////////////////////////////////////////////////////////////////////////////
-  
-  
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+

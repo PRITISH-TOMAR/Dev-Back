@@ -1,5 +1,4 @@
 import express from "express";
-import {Newuser} from '../Models/User.js'
 import { create, retrieve, Delete, Update, LikeArticle} from "../Models/Article.js";
 const RouteArticles = express.Router();
 

@@ -1,30 +1,35 @@
 import nodemailer from "nodemailer";
 import dotenv from 'dotenv';
-dotenv.config({
-  path: '.env'
-});
+
+dotenv.config({ path: '.env' });
+
 const generateOTP = () => {
-  return Math.floor(1000 + Math.random() * 9000).toString();
+    return Math.floor(1000 + Math.random() * 9000).toString();
 };
+
 const otp = generateOTP();
-let otps = {};
+let otps = {}
+
+
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
-  host: "smtp.gmail.com",
+    service: "Gmail",
+    host: "smtp.gmail.com",
+   
   auth: {
     user: process.env.USERMAIL,
     pass: process.env.USERPASS
   }
 });
+
+
+//..............................Send Email.....................................
 export const Send = async (req, res) => {
-  const email = req.body.email;
+  const  email  = req.body.email;
   const otp = generateOTP();
   const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+  
+  otps[email] = { otp, expirationTime };
 
-  otps[email] = {
-    otp,
-    expirationTime
-  };
   const mailOptions = {
     from: process.env.SENDERMAIL,
     to: email,
@@ -51,45 +56,47 @@ export const Send = async (req, res) => {
           If you have any questions or need assistance, please feel free to reach out to us. We are here to help!
         </p>
       </div>
-    `
+    `,
   };
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: ", info.response);
-    res.status(200).send("OTP sent successfully.");
-  } catch (error) {
-    res.status(400).json({
-      message: "Error : " + error
-    });
-  }
-};
-export const Verify = (req, res) => {
+  
+
+
+try {
+  const info = await transporter.sendMail(mailOptions);
+  console.log("Email sent: ", info.response);
+  res.status(200).send("OTP sent successfully.");
+} catch (error)
+{
+  res.status(400).json({message:"Error : "+ error})
+}
+
+
+}
+
+
+//..........................Verify.......................................
+
+export const Verify=  (req, res) => {
   const email = req.query.email;
   const otp = req.query.otp;
   const record = otps[email];
+
+
   if (!record) {
-    return res.status(400).json({
-      message: "No OTP found for this email."
-    });
+      return res.status(400).json({message:"No OTP found for this email." });
   }
-  const {
-    otp: storedOtp,
-    expirationTime
-  } = record;
+
+  const { otp: storedOtp, expirationTime } = record;
+
   if (Date.now() > expirationTime) {
-    delete otps[email]; // Clean up expired OTP
-    return res.status(400).json({
-      message: "OTP has expired."
-    });
+      delete otps[email]; // Clean up expired OTP
+      return res.status(400).json({message:"OTP has expired."});
   }
+
   if (storedOtp === otp) {
-    delete otps[email]; // Clean up used OTP
-    return res.status(200).json({
-      message: "OTP verified successfully."
-    });
+      delete otps[email]; // Clean up used OTP
+      return res.status(200).json({message:"OTP verified successfully."});
   } else {
-    return res.status(400).json({
-      message: "Invalid OTP."
-    });
+      return res.status(400).json({message:"Invalid OTP."});
   }
 };

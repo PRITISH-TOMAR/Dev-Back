@@ -1,4 +1,3 @@
-// import Connect from './Utils/Connect.js';
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -8,6 +7,8 @@ import RouteArticles from './Routes/RouteArticles.js';
 import RouteComment from './Routes/RouteComment.js'
 import Email from "./Routes/RouteEmail.js"
 
+
+// ..................................................................
 // Connect()
 dotenv.config({ path: '.env' });
 mongoose.connect( process.env.MONGO_URL).then
@@ -32,6 +33,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+//...................................................................
+
 
 app.use("/api", Routemain)
 app.use("/articles", RouteArticles)
@@ -39,7 +42,7 @@ app.use("/comments", RouteComment)
 app.use("/email", Email)
 
 
-
+//....................................................................
 app.listen(process.env.PORT, () => {
     console.log('Server Running at Port ' + process.env.PORT);
 });
