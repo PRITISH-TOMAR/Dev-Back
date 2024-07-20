@@ -37,7 +37,7 @@ export const Send = async (req, res) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center;">
         <div style="text-align: center; margin-bottom: 20px;">
-          <a href="addlink.com"> <img src="https://i.ibb.co/Fsq94T3/Alpha.png" alt="AlphaLearn" style="user-select: none; width: 150px; margin-bottom: 20px;"></a>
+          <a href="https://alphalearn-dev.netlify.app"> <img src="https://i.ibb.co/Fsq94T3/Alpha.png" alt="AlphaLearn" style="user-select: none; width: 150px; margin-bottom: 20px;"></a>
         </div>
         <h2 style="color: #333; margin-bottom: 20px;">OTP Verification Email</h2>
         <p style="color: #555; line-height: 1.5; margin-bottom: 20px;">

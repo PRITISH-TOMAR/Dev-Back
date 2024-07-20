@@ -200,7 +200,7 @@ export const Delete = async (req, res) => {
 export const Udetails = async (req, res) => {
 
     const uniqueName = req.query.user
-    console.log(uniqueName)
+    // console.log(uniqueName)
     try {
         const item = await Data.findOne({ uniqueName });
 
