@@ -136,7 +136,7 @@ export const Google = async (req, res) => {
             });
         }
     } catch (e) {
-        // console.log(e);
+        console.log(e);
         return res.status(500).json({
             message: 'Internal server error',
             success: false,
