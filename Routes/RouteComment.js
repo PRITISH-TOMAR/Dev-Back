@@ -1,5 +1,5 @@
 import express from "express";
-import { Create, likeComment, Retrieve, editComment, deleteComment} from "../Models/Comment.js";
+import { Create, likeComment, Retrieve, editComment, deleteComment} from "../Controllers/Comment.js";
 const RouteComment = express.Router();
 
 RouteComment.route("/create").post(Create);

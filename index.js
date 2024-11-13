@@ -6,6 +6,8 @@ import Routemain from './Routes/Routemain.js';
 import RouteArticles from './Routes/RouteArticles.js';
 import RouteComment from './Routes/RouteComment.js'
 import Email from "./Routes/RouteEmail.js"
+// import CheckForAuthenticationCookie from './MiddleWare/Auth.js';
+import cookieParser from 'cookie-parser';
 
 
 // ..................................................................
@@ -13,16 +15,19 @@ import Email from "./Routes/RouteEmail.js"
 dotenv.config({ path: '.env' });
 mongoose.connect( process.env.MONGO_URL).then
     (() => {
-        console.log("Mongodb connected")
+        console.log("Mongodb connected") 
     }).catch((e) =>
         console.log(e)
-)
+) 
 
 //..................................................................
 
 const app = express();
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
+app.use(cookieParser());
+
+
 
 
 const corsOptions = {

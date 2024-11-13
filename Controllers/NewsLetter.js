@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' });
 
 
-
+// SERIVCE CONNECTOR
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     host: "smtp.gmail.com",

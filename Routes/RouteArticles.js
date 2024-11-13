@@ -1,12 +1,13 @@
 import express from "express";
-import { create, retrieve, Delete, Update, LikeArticle} from "../Models/Article.js";
+import { create, retrieve, Delete, Update, LikeArticle} from "../Controllers/Article.js";
+import CheckForAuthenticationCookie from '../MiddleWare/Auth.js'
 const RouteArticles = express.Router();
 
-RouteArticles.route("/create").post(create);
-RouteArticles.route("/retrieve").get(retrieve);
-RouteArticles.route("/delete").delete(Delete);
-RouteArticles.route("/update").put(Update);
-RouteArticles.route("/like").put(LikeArticle);
+RouteArticles.post("/create", CheckForAuthenticationCookie, create);
+RouteArticles.get("/retrieve", retrieve);
+RouteArticles.delete("/delete", CheckForAuthenticationCookie, Delete);
+RouteArticles.put("/update", CheckForAuthenticationCookie, Update);
+RouteArticles.put("/like", CheckForAuthenticationCookie, LikeArticle);
 
 
 

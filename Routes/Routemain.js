@@ -1,7 +1,7 @@
 import express from "express";
-import {Newuser} from '../Models/User.js'
-import { Login , Logout, Google, Delete, Udetails} from "../Models/User.js";
-import { Update } from "../Models/User.js";
+import {} from '../Models/User.js'
+import { Update, Login , Logout, Newuser, Google, Delete, Udetails} from "../Controllers/User.js";
+import {  } from "../Models/User.js";
 const Routemain = express.Router();
 
 Routemain.route("/newuser").post(Newuser);

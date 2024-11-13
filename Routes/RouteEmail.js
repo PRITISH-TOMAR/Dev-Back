@@ -1,7 +1,7 @@
 import express from "express";
-import { Send, Verify} from "../Models/EmailOTP.js";
-import { SendMessage } from "../Models/Messages.js";
-import { NewsLetter } from "../Models/NewsLetter.js";
+import { Send, Verify} from "../Controllers/EmailOTP.js";
+import { SendMessage } from "../Controllers/Messages.js";
+import { NewsLetter } from "../Controllers/NewsLetter.js";
 const RouteComment = express.Router();
 
 RouteComment.route("/send").post(Send);

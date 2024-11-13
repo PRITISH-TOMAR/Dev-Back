@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from 'dotenv';
+import Data from '../Models/User.js'
 
 dotenv.config({ path: '.env' });
 
@@ -7,7 +8,7 @@ const generateOTP = () => {
     return Math.floor(1000 + Math.random() * 9000).toString();
 };
 
-const otp = generateOTP();
+// const otp = generateOTP();
 let otps = {}
 
 
@@ -62,6 +63,12 @@ export const Send = async (req, res) => {
 
 
 try {
+
+  const user = await  Data.findOne({email});
+  console.log(user)
+
+  if(user)  return res.status(403).json({message:"Email Atready Exists !"})
+
   const info = await transporter.sendMail(mailOptions);
   console.log("Email sent: ", info.response);
   res.status(200).send("OTP sent successfully.");
